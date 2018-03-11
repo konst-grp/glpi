@@ -35,6 +35,13 @@ then
  exit ;
 fi
 
+read -p "Are translations up to date? [Y/n] " -n 1 -r
+echo    # (optional) move to a new line
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 # handle exits from shell or function but don't exit interactive shell
+fi
+
 INIT_DIR=$1;
 RELEASE=$2;
 
@@ -88,6 +95,8 @@ echo "Delete various scripts and directories"
 \rm -rf tests;
 \rm -rf .gitignore;
 \rm -rf .travis.yml;
+\rm -rf .atoum.php;
+\rm -rf .circleci;
 \rm -rf phpunit.xml.dist;
 \rm -rf composer.json;
 \rm -rf composer.lock;

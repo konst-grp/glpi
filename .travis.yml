@@ -1,5 +1,5 @@
-dist: precise
 language: php
+sudo: required
 
 env:
   - DB=mysql
@@ -11,27 +11,14 @@ before_script:
   - rm -f composer.lock
   - composer install --optimize-autoloader
   #install 0.72.3 database
-  - mysql -u root -e 'create database glpitest0723;'
-  - mysql -u root glpitest0723 < tests/glpi-0.72.3-empty.sql
-  - cp tests/travis.config_db.php tests/config_db.php
-  - php tools/cliupdate.php --config-dir=../tests --dev
-  - rm tests/config_db.php
   - mysql -u root -e 'create database glpitest;'
-  - php tools/cliinstall.php --db=glpitest --user=root --tests
-  - php tools/cliupdate.php --config-dir=../tests |grep -q "No migration needed." || (echo "tools/cliupdate.php FAILED" && exit 1)
-  - php -S localhost:8088 tests/router.php &>/dev/null &
+  - php scripts/cliinstall.php --db=glpitest --user=root --tests
+  - php scripts/cliupdate.php --config-dir=../tests |grep -q "No migration needed." || (echo "scripts/cliupdate.php FAILED" && exit 1)
   # LDAP stuff
-  - phpenv config-add tests/enable-ldap.ini
   - ./tests/LDAP/ldap_fixtures.sh > /dev/null
-  #APCu
-  - phpenv config-add tests/enable-apcu.ini
 script:
   - mysql -u root -e 'select version();'
-  - composer testdb
-  - composer test
-  - composer testweb
   - composer testldap
-  - if [[ "$CS" == "true" ]]; then composer cs; fi
 
 #note: default maria version is 5.5 for all main php versions list exept nightly
 matrix:
@@ -44,17 +31,12 @@ matrix:
             - slapd
     - php: 7.0
       addons:
+        mariadb: 10.2
         apt:
           packages:
             - ldap-utils
             - slapd
-    - php: 7.1
-      addons:
-        mariadb: 10.0
-        apt:
-          packages:
-            - ldap-utils
-            - slapd
+
     - php: 7.1
       addons:
         mariadb: 10.1
@@ -62,13 +44,7 @@ matrix:
           packages:
             - ldap-utils
             - slapd
-    - php: 7.1
-      env: CS=true
-      addons:
-        apt:
-          packages:
-            - ldap-utils
-            - slapd
+
     - php: 7.2
       addons:
         apt:

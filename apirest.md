@@ -41,7 +41,7 @@ Method
 itemtype
 :   A GLPI type, could be an asset, an itil or a configuration object, etc.
     This type must be a class who inherits CommonDTBM GLPI class.
-    See [List itemtypes](https://forge.glpi-project.org/projects/glpi/embedded/class-CommonDBTM.html).
+    See [List itemtypes](https://forge.glpi-project.org/apidoc/class-CommonDBTM.html).
 
 searchOption
 :   A column identifier (integer) of an itemtype (ex: 1 -> id, 2 -> name, ...).
@@ -1308,6 +1308,10 @@ You miss to provide Session-Token in header of your HTTP request.
 ### ERROR_APP_TOKEN_PARAMETERS_MISSING
 
 The current API requires an App-Token header for using its methods.
+
+### ERROR_WRONG_APP_TOKEN_PARAMETER
+
+It seems the provided application token doesn't exists in GLPI API configuration.
 
 ### ERROR_NOT_DELETED
 

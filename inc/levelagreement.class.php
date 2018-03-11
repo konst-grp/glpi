@@ -244,8 +244,6 @@ abstract class LevelAgreement extends CommonDBChild {
     * @param  bool           $canupdate update right
     */
    function showForTicket(Ticket $ticket, $type, $tt, $canupdate) {
-      global $CFG_GLPI;
-
       list($dateField, $laField) = static::getFieldNames($type);
       $rand = mt_rand();
       $pre  = static::$prefix;
@@ -298,7 +296,7 @@ abstract class LevelAgreement extends CommonDBChild {
                function delete_date$type$rand(e) {
                   e.preventDefault();
 
-                  if (nativeConfirm('".addslashes(__('Also delete date ?'))."')) {
+                  if (nativeConfirm('".addslashes(__('Also delete date?'))."')) {
                      submitGetLink('$ticket_url',
                                    ".json_encode(array_merge($fields, ['delete_date' => 1])).");
                   } else {
@@ -404,8 +402,7 @@ abstract class LevelAgreement extends CommonDBChild {
       $calendar = new Calendar();
       $rand     = mt_rand();
       $canedit  = ($slm->canEdit($instID)
-                   && isset($_SESSION["glpiactiveprofile"])
-                   && $_SESSION["glpiactiveprofile"]["interface"] == "central");
+                   && Session::getCurrentInterface() == "central");
 
       if ($canedit) {
          echo "<div id='showLa$instID$rand'></div>\n";
@@ -526,7 +523,7 @@ abstract class LevelAgreement extends CommonDBChild {
          'FROM'            => 'glpi_ruleactions',
          'WHERE'           => [
             'field' => $fk,
-            'value' => $this->getID()]]));
+            'value' => $this->getID()]]), false);
       $nb = count($rules_id_list);
 
       echo "<div class='spaced'>";
@@ -575,7 +572,7 @@ abstract class LevelAgreement extends CommonDBChild {
                echo "<td width='10'>";
                Html::showMassiveActionCheckBox("RuleTicket", $rule->fields["id"]);
                echo "</td>";
-               echo "<td><a href='".Toolbox::getItemTypeFormURL(get_class($this))."?id=" .
+               echo "<td><a href='".Toolbox::getItemTypeFormURL(get_class($rule))."?id=" .
                       $rule->fields["id"] . "&amp;onglet=1'>" .$rule->fields["name"] ."</a></td>";
 
             } else {
@@ -982,8 +979,10 @@ abstract class LevelAgreement extends CommonDBChild {
 
       $pre = static::$prefix;
 
-      $levels_id = ($levels_id ? $levels_id
-                               : $ticket->fields["ttr_".$pre."levels_id"]);
+      if (!$levels_id && isset($ticket->fields['ttr'.$pre.'levels_id'])) {
+         $levels_id = $ticket->fields["ttr_".$pre."levels_id"];
+      }
+
       if ($levels_id) {
          $toadd = [];
          $date = $this->computeExecutionDate($ticket->fields['date'], $levels_id,

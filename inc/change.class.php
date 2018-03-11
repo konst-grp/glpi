@@ -493,7 +493,7 @@ class Change extends CommonITILObject {
                    self::APPROVAL      => __('Approval'),
                    self::ACCEPTED      => _x('status', 'Accepted'),
                    self::WAITING       => __('Pending'),
-                   self::TEST          => _x('change', 'Test'),
+                   self::TEST          => _x('change', 'Testing'),
                    self::QUALIFICATION => __('Qualification'),
                    self::SOLVED        => __('Applied'),
                    self::OBSERVED      => __('Review'),
@@ -1050,8 +1050,7 @@ class Change extends CommonITILObject {
             } else {
                $restrict = "='".$item->getID()."'";
             }
-            $restrict   = "(`glpi_changes_groups`.`groups_id` $restrict
-                            AND `glpi_changes_groups`.`type` = ".CommonITILActor::REQUESTER.")";
+            $restrict   = "(`glpi_changes_groups`.`groups_id` $restrict)";
             $order      = '`glpi_changes`.`date_mod` DESC';
 
             $options['criteria'][0]['field']      = 71;

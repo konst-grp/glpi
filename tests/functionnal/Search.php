@@ -118,20 +118,20 @@ class Search extends DbTestCase {
 
    public function testMetaComputerSoftwareLicense() {
       $search_params = ['is_deleted'   => 0,
-                             'start'        => 0,
-                             'criteria'     => [0 => ['field'      => 'view',
-                                                                'searchtype' => 'contains',
-                                                                'value'      => '']],
-                             'metacriteria' => [0 => ['link'       => 'AND',
-                                                                'itemtype'   => 'Software',
-                                                                'field'      => 163,
-                                                                'searchtype' => 'contains',
-                                                                'value'      => '>0'],
-                                                     1 => ['link'       => 'AND',
-                                                                'itemtype'   => 'Software',
-                                                                'field'      => 160,
-                                                                'searchtype' => 'contains',
-                                                                'value'      => 'firefox']]];
+                        'start'        => 0,
+                        'criteria'     => [0 => ['field'      => 'view',
+                                                 'searchtype' => 'contains',
+                                                 'value'      => '']],
+                        'metacriteria' => [0 => ['link'       => 'AND',
+                                                 'itemtype'   => 'Software',
+                                                 'field'      => 163,
+                                                 'searchtype' => 'contains',
+                                                 'value'      => '>0'],
+                                           1 => ['link'       => 'AND',
+                                                 'itemtype'   => 'Software',
+                                                 'field'      => 160,
+                                                 'searchtype' => 'contains',
+                                                 'value'      => 'firefox']]];
 
       $data = $this->doSearch('Computer', $search_params);
 
@@ -144,35 +144,35 @@ class Search extends DbTestCase {
 
    public function testMetaComputerUser() {
       $search_params = ['is_deleted'   => 0,
-                             'start'        => 0,
-                             'search'       => 'Search',
-                             'criteria'     => [0 => ['field'      => 'view',
-                                                                'searchtype' => 'contains',
-                                                                'value'      => '']],
-                                                     // user login
-                             'metacriteria' => [0 => ['link'       => 'AND',
-                                                                'itemtype'   => 'User',
-                                                                'field'      => 1,
-                                                                'searchtype' => 'equals',
-                                                                'value'      => 2],
-                                                     // user profile
-                                                     1 => ['link'       => 'AND',
-                                                                'itemtype'   => 'User',
-                                                                'field'      => 20,
-                                                                'searchtype' => 'equals',
-                                                                'value'      => 4],
-                                                     // user entity
-                                                     2 => ['link'       => 'AND',
-                                                                'itemtype'   => 'User',
-                                                                'field'      => 80,
-                                                                'searchtype' => 'equals',
-                                                                'value'      => 0],
-                                                     // user profile
-                                                     3 => ['link'       => 'AND',
-                                                                'itemtype'   => 'User',
-                                                                'field'      => 13,
-                                                                'searchtype' => 'equals',
-                                                                'value'      => 1]]];
+                        'start'        => 0,
+                        'search'       => 'Search',
+                        'criteria'     => [0 => ['field'      => 'view',
+                                                 'searchtype' => 'contains',
+                                                 'value'      => '']],
+                                           // user login
+                        'metacriteria' => [0 => ['link'       => 'AND',
+                                                 'itemtype'   => 'User',
+                                                 'field'      => 1,
+                                                 'searchtype' => 'equals',
+                                                 'value'      => 2],
+                                           // user profile
+                                           1 => ['link'       => 'AND',
+                                                 'itemtype'   => 'User',
+                                                 'field'      => 20,
+                                                 'searchtype' => 'equals',
+                                                 'value'      => 4],
+                                           // user entity
+                                           2 => ['link'       => 'AND',
+                                                 'itemtype'   => 'User',
+                                                 'field'      => 80,
+                                                 'searchtype' => 'equals',
+                                                 'value'      => 0],
+                                           // user profile
+                                           3 => ['link'       => 'AND',
+                                                 'itemtype'   => 'User',
+                                                 'field'      => 13,
+                                                 'searchtype' => 'equals',
+                                                 'value'      => 1]]];
 
       $data = $this->doSearch('Computer', $search_params);
 
@@ -185,27 +185,27 @@ class Search extends DbTestCase {
 
    public function testUser() {
       $search_params = ['is_deleted'   => 0,
-                             'start'        => 0,
-                             'search'       => 'Search',
+                        'start'        => 0,
+                        'search'       => 'Search',
                                                      // profile
-                             'criteria'     => [0 => ['field'      => '20',
-                                                                'searchtype' => 'contains',
-                                                                'value'      => 'super-admin'],
-                                                     // login
-                                                     1 => ['link'       => 'AND',
-                                                                'field'      => '1',
-                                                                'searchtype' => 'contains',
-                                                                'value'      => 'glpi'],
-                                                     // entity
-                                                     2 => ['link'       => 'AND',
-                                                                'field'      => '80',
-                                                                'searchtype' => 'equals',
-                                                                'value'      => 0],
-                                                     // is not not active
-                                                     3 => ['link'       => 'AND',
-                                                                'field'      => '8',
-                                                                'searchtype' => 'notequals',
-                                                                'value'      => 0]]];
+                        'criteria'     => [0 => ['field'      => '20',
+                                                 'searchtype' => 'contains',
+                                                 'value'      => 'super-admin'],
+                                           // login
+                                           1 => ['link'       => 'AND',
+                                                 'field'      => '1',
+                                                 'searchtype' => 'contains',
+                                                 'value'      => 'glpi'],
+                                           // entity
+                                           2 => ['link'       => 'AND',
+                                                 'field'      => '80',
+                                                 'searchtype' => 'equals',
+                                                 'value'      => 0],
+                                           // is not not active
+                                           3 => ['link'       => 'AND',
+                                                 'field'      => '8',
+                                                 'searchtype' => 'notequals',
+                                                 'value'      => 0]]];
       $data = $this->doSearch('User', $search_params);
 
       // check for sql error (data key missing or empty)
@@ -252,6 +252,9 @@ class Search extends DbTestCase {
          }
          $item = getItemForItemtype($itemtype);
 
+         //load all options; so getSearchOptionsToAdd to be tested
+         $options = \Search::getCleanedOptions($itemtype);
+         //but reload only items one because of mysql join limit
          $options = $item->getSearchOptions();
          $compare_options = [];
          foreach ($options as $key => $value) {
@@ -278,9 +281,9 @@ class Search extends DbTestCase {
 
          // do a search query
          $search_params = ['is_deleted'   => 0,
-                                'start'        => 0,
-                                'criteria'     => [],
-                                'metacriteria' => []];
+                           'start'        => 0,
+                           'criteria'     => [],
+                           'metacriteria' => []];
          $data = $this->doSearch($itemtype, $search_params);
          // check for sql error (data key missing or empty)
          $this->array($data)
@@ -319,11 +322,11 @@ class Search extends DbTestCase {
       foreach ($itemtypeslist as $itemtype) {
          // do a search query
          $search_params = ['is_deleted'   => 0,
-                                'start'        => 0,
-                                'criteria'     => [0 => ['field'      => 'view',
-                                                                   'searchtype' => 'contains',
-                                                                   'value'      => '']],
-                                'metacriteria' => []];
+                           'start'        => 0,
+                           'criteria'     => [0 => ['field'      => 'view',
+                                                    'searchtype' => 'contains',
+                                                    'value'      => '']],
+                           'metacriteria' => []];
          $metacriteria = [];
          $metaList = \Search::getMetaItemtypeAvailable($itemtype);
          foreach ($metaList as $metaitemtype) {
@@ -360,17 +363,17 @@ class Search extends DbTestCase {
 
    public function testIsNotifyComputerGroup() {
       $search_params = ['is_deleted'   => 0,
-                             'start'        => 0,
-                             'search'       => 'Search',
-                             'criteria'     => [0 => ['field'      => 'view',
-                                                                'searchtype' => 'contains',
-                                                                'value'      => '']],
+                        'start'        => 0,
+                        'search'       => 'Search',
+                        'criteria'     => [0 => ['field'      => 'view',
+                                                 'searchtype' => 'contains',
+                                                 'value'      => '']],
                                                      // group is_notify
-                             'metacriteria' => [0 => ['link'       => 'AND',
-                                                                'itemtype'   => 'Group',
-                                                                'field'      => 20,
-                                                                'searchtype' => 'equals',
-                                                                'value'      => 1]]];
+                        'metacriteria' => [0 => ['link'       => 'AND',
+                                                 'itemtype'   => 'Group',
+                                                 'field'      => 20,
+                                                 'searchtype' => 'equals',
+                                                 'value'      => 1]]];
       $this->login();
       $this->setEntity('_test_root_entity', true);
 
@@ -702,6 +705,109 @@ class Search extends DbTestCase {
                  ->isTrue("$table.$field is missing");
          }
       }
+   }
+
+   public function testProblems() {
+      $tech_users_id = getItemByTypeName('User', "tech", true);
+
+      // reduce the right of tech profile
+      // to have only the right of display their own problems (created, assign)
+      \ProfileRight::updateProfileRights(getItemByTypeName('Profile', "Technician", true), [
+         'Problem' => (\Problem::READMY + READNOTE + UPDATENOTE)
+      ]);
+
+      // add a group for tech user
+      $group = new \Group;
+      $groups_id = $group->add([
+         'name' => "test group for tech user"
+      ]);
+      $this->integer((int)$groups_id)->isGreaterThan(0);
+      $group_user = new \Group_User;
+      $this->integer(
+         (int)$group_user->add([
+            'groups_id' => $groups_id,
+            'users_id'  => $tech_users_id
+         ])
+      )->isGreaterThan(0);
+
+      // create a problem and assign group with tech user
+      $problem = new \Problem;
+      $this->integer(
+         (int)$problem->add([
+            'name'              => "test problem visibility for tech",
+            'content'           => "test problem visibility for tech",
+            '_groups_id_assign' => $groups_id
+         ])
+      )->isGreaterThan(0);
+
+      // let's use tech user
+      $this->login('tech', 'tech');
+
+      // do search and check presence of the created problem
+      $data = \Search::prepareDatasForSearch('Problem', ['reset' => 'reset']);
+      \Search::constructSQL($data);
+      \Search::constructDatas($data); // should be constructDatas in 9.3
+
+      $this->array($data)->array['data']->integer['totalcount']->isEqualTo(1);
+      $this->array($data)
+         ->array['data']
+         ->array['rows']
+         ->array[0]
+         ->array['raw']
+         ->string['ITEM_0']->isEqualTo('test problem visibility for tech');
+
+   }
+
+   public function testChanges() {
+      $tech_users_id = getItemByTypeName('User', "tech", true);
+
+      // reduce the right of tech profile
+      // to have only the right of display their own changes (created, assign)
+      \ProfileRight::updateProfileRights(getItemByTypeName('Profile', "Technician", true), [
+         'Change' => (\Change::READMY + READNOTE + UPDATENOTE)
+      ]);
+
+      // add a group for tech user
+      $group = new \Group;
+      $groups_id = $group->add([
+         'name' => "test group for tech user"
+      ]);
+      $this->integer((int)$groups_id)->isGreaterThan(0);
+
+      $group_user = new \Group_User;
+      $this->integer(
+         (int)$group_user->add([
+            'groups_id' => $groups_id,
+            'users_id'  => $tech_users_id
+         ])
+      )->isGreaterThan(0);
+
+      // create a Change and assign group with tech user
+      $change = new \Change;
+      $this->integer(
+         (int)$change->add([
+            'name'              => "test Change visibility for tech",
+            'content'           => "test Change visibility for tech",
+            '_groups_id_assign' => $groups_id
+         ])
+      )->isGreaterThan(0);
+
+      // let's use tech user
+      $this->login('tech', 'tech');
+
+      // do search and check presence of the created Change
+      $data = \Search::prepareDatasForSearch('Change', ['reset' => 'reset']);
+      \Search::constructSQL($data);
+      \Search::constructDatas($data); // should be constructDatas in 9.3
+
+      $this->array($data)->array['data']->integer['totalcount']->isEqualTo(1);
+      $this->array($data)
+         ->array['data']
+         ->array['rows']
+         ->array[0]
+         ->array['raw']
+         ->string['ITEM_0']->isEqualTo('test Change visibility for tech');
+
    }
 }
 

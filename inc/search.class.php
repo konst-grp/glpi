@@ -936,6 +936,14 @@ class Search {
                $DBread->execution_time = true;
                $result = $DBread->query($data['sql']['search']);
             }
+
+            if ($res['Code'] == 1116) { // too many tables
+               echo self::showError($data['search']['display_type'],
+                                    __("'All' criterion is not usable with this object list, ".
+                                       "sql query fails (too many tables). ".
+                                       "Please use 'Items seen' criterion instead"));
+               return false;
+            }
          }
       }
 
@@ -1094,19 +1102,25 @@ class Search {
                   }
 
                   // No Group_concat case
-                  if (strpos($val, self::LONGSEP) === false) {
+                  if ($fieldname == 'content' || strpos($val, self::LONGSEP) === false) {
                      $newrow[$j]['count'] = 1;
 
-                     if (strpos($val, self::SHORTSEP) === false) {
+                     $handled = false;
+                     if ($fieldname != 'content' && strpos($val, self::SHORTSEP) !== false) {
+                        $split2                    = self::explodeWithID(self::SHORTSEP, $val);
+                        if (is_numeric($split2[1])) {
+                           $newrow[$j][0][$fieldname] = $split2[0];
+                           $newrow[$j][0]['id']       = $split2[1];
+                           $handled = true;
+                        }
+                     }
+
+                     if (!$handled) {
                         if ($val == self::NULLVALUE) {
                            $newrow[$j][0][$fieldname] = null;
                         } else {
                            $newrow[$j][0][$fieldname] = $val;
                         }
-                     } else {
-                        $split2                    = self::explodeWithID(self::SHORTSEP, $val);
-                        $newrow[$j][0][$fieldname] = $split2[0];
-                        $newrow[$j][0]['id']       = $split2[1];
                      }
                   } else {
                      if (!isset($newrow[$j])) {
@@ -1115,16 +1129,22 @@ class Search {
                      $split               = explode(self::LONGSEP, $val);
                      $newrow[$j]['count'] = count($split);
                      foreach ($split as $key2 => $val2) {
-                        if (strpos($val2, self::SHORTSEP) === false) {
-                           $newrow[$j][$key2][$fieldname] = $val2;
-                        } else {
+                        $handled = false;
+                        if (strpos($val2, self::SHORTSEP) !== false) {
                            $split2                  = self::explodeWithID(self::SHORTSEP, $val2);
-                           $newrow[$j][$key2]['id'] = $split2[1];
-                           if ($split2[0] == self::NULLVALUE) {
-                              $newrow[$j][$key2][$fieldname] = null;
-                           } else {
-                              $newrow[$j][$key2][$fieldname] = $split2[0];
+                           if (is_numeric($split2[1])) {
+                              $newrow[$j][$key2]['id'] = $split2[1];
+                              if ($split2[0] == self::NULLVALUE) {
+                                 $newrow[$j][$key2][$fieldname] = null;
+                              } else {
+                                 $newrow[$j][$key2][$fieldname] = $split2[0];
+                              }
+                              $handled = true;
                            }
+                        }
+
+                        if (!$handled) {
+                           $newrow[$j][$key2][$fieldname] = $val2;
                         }
                      }
                   }
@@ -1498,7 +1518,10 @@ class Search {
             }
             // End Line
             echo self::showEndLine($data['display_type']);
-            Html::glpi_flush();
+            // Flush ONLY for an HTML display (issue #3348)
+            if ($data['display_type'] == self::HTML_OUTPUT) {
+                Html::glpi_flush();
+            }
          }
 
          // Create title
@@ -2758,7 +2781,7 @@ class Search {
             } else if ($itemtype == 'Problem') {
                $right       = 'problem';
                $table       = 'problems';
-               $groupetable = "`glpi_groups_problems";
+               $groupetable = "`glpi_groups_problems_";
             }
             // Same structure in addDefaultJoin
             $condition = '';
@@ -2789,10 +2812,14 @@ class Search {
                $condition = "(";
 
                if (Session::haveRight("$right", $itemtype::READMY)) {
+                  $my_groups_keys = implode("','", $_SESSION['glpigroups']);
                   $condition .= " $requester_table.users_id = '".Session::getLoginUserID()."'
                                  OR $observer_table.users_id = '".Session::getLoginUserID()."'
                                  OR $assign_table.users_id = '".Session::getLoginUserID()."'
-                                 OR `glpi_".$table."`.`users_id_recipient` = '".Session::getLoginUserID()."'";
+                                 OR `glpi_".$table."`.`users_id_recipient` = '".Session::getLoginUserID()."'
+                                 OR $requestergroup_table.groups_id IN ($my_groups_keys)
+                                 OR $observergroup_table.groups_id IN ($my_groups_keys)
+                                 OR $assigngroup_table.groups_id IN ($my_groups_keys)";
                } else {
                   $condition .= "0=1";
                }
@@ -4480,6 +4507,7 @@ class Search {
                   switch ($table.'.'.$field) {
                      // If ticket has been taken into account : no progression display
                      case "glpi_tickets.time_to_own" :
+                     case "glpi_tickets.internal_time_to_own" :
                         if (($item->fields['takeintoaccount_delay_stat'] > 0)) {
                            return $out;
                         }
@@ -4651,13 +4679,9 @@ class Search {
                   foreach ($data[$num] as $key => $val) {
                      if (is_numeric($key)) {
                         if (!empty($val['name'])) {
-                           if (substr($val['name'], 0, 6) == 'Plugin') {
-                              $plug = new $val['name']();
-                              $name = $plug->getTypeName();
-                              $itemtypes[] = __($name);
-                           } else {
-                              $itemtypes[] = __($val['name']);
-                           }
+                           $item = new $val['name']();
+                           $name = $item->getTypeName();
+                           $itemtypes[] = __($name);
                         }
                      }
                   }
@@ -5116,7 +5140,8 @@ class Search {
       } else {
          $options = self::getCleanedOptions($itemtype);
          foreach ($options as $key => $val) {
-            if (is_array($val)) {
+            if (is_array($val)
+                && isset($val['table'])) {
                $default_criteria = $key;
                break;
             }
@@ -5148,17 +5173,28 @@ class Search {
       if (($itemtype != 'AllAssets')
           && class_exists($itemtype)) {
 
-         $user_default_values = SavedSearch_User::getDefault(Session::getLoginUserID(), $itemtype);
+         // retrieve default values for current itemtype
+         $itemtype_default_values = [];
+         if (method_exists($itemtype, 'getDefaultSearchRequest')) {
+            $itemtype_default_values = call_user_func([$itemtype, 'getDefaultSearchRequest']);
+         }
 
-         if (!$user_default_values
-             && method_exists($itemtype, 'getDefaultSearchRequest')) {
-            // user has no default bookmark (nor public, nor private) for $itemtype
-            // then gets defined one for type
-            $user_default_values = call_user_func([$itemtype, 'getDefaultSearchRequest']);
+         // retrieve default values for the current user
+         $user_default_values = SavedSearch_User::getDefault(Session::getLoginUserID(), $itemtype);
+         if ($user_default_values === false) {
+            $user_default_values = [];
          }
-         if ($user_default_values) {
-            $default_values = array_merge($default_values, $user_default_values);
-         }
+
+         // we construct default values in this order:
+         // - general default
+         // - itemtype default
+         // - user default
+         //
+         // The last ones erase values or previous
+         // So, we can combine each part (order from itemtype, criteria from user, etc)
+         $default_values = array_merge($default_values,
+                                       $itemtype_default_values,
+                                       $user_default_values);
       }
 
       // First view of the page or force bookmark : try to load a bookmark
@@ -5220,7 +5256,7 @@ class Search {
       foreach ($default_values as $key => $val) {
          if (!isset($params[$key])) {
             if ($usesession
-                && ($key == 'is_deleted' || !isset($saved_params[$key])) // retrieve session only if not a new request
+                && ($key == 'is_deleted' || !isset($saved_params['criteria'])) // retrieve session only if not a new request
                 && isset($_SESSION['glpisearch'][$itemtype][$key])) {
                $params[$key] = $_SESSION['glpisearch'][$itemtype][$key];
             } else {
@@ -5545,15 +5581,6 @@ class Search {
                   self::$search[$itemtype][$key]['linkfield'] = getForeignKeyFieldForTable($val['table']);
                }
             }
-            // Set default datatype
-            // if (!isset($val['datatype']) || empty($val['datatype'])) {
-            //    if ((strcmp($itemtable,$val['table']) != 0)
-            //        && ($val['field'] == 'name' || $val['field'] == 'completename')) {
-            //       self::$search[$itemtype][$key]['datatype'] = 'dropdown';
-            //    } else {
-            //       self::$search[$itemtype][$key]['datatype'] = 'string';
-            //    }
-            // }
             // Add default joinparams
             if (!isset($val['joinparams'])) {
                self::$search[$itemtype][$key]['joinparams'] = [];
@@ -5858,10 +5885,14 @@ class Search {
     * Print generic error
     *
     * @param $type display type (0=HTML, 1=Sylk,2=PDF,3=CSV)
+    * @param $message message to display, if empty "no item found" will be displayed
     *
     * @return string to display
    **/
-   static function showError($type) {
+   static function showError($type, $message = "") {
+      if (strlen($message) == 0) {
+         $message = __('No item found');
+      }
 
       $out = "";
       switch ($type) {
@@ -5872,7 +5903,7 @@ class Search {
             break;
 
          default :
-            $out = "<div class='center b'>".__('No item found')."</div>\n";
+            $out = "<div class='center b'>$message</div>\n";
       }
       return $out;
    }
@@ -6258,12 +6289,17 @@ class Search {
    static function makeTextCriteria ($field, $val, $not = false, $link = 'AND') {
 
       $sql = $field . self::makeTextSearch($val, $not);
+      // mange empty field (string with length = 0)
+      $sql_or = "";
+      if (strtolower($val) == "null") {
+         $sql_or = "OR $field = ''";
+      }
 
       if (($not && ($val != 'NULL') && ($val != 'null') && ($val != '^$'))    // Not something
           ||(!$not && ($val == '^$'))) {   // Empty
          $sql = "($sql OR $field IS NULL)";
       }
-      return " $link $sql ";
+      return " $link ($sql $sql_or)";
    }
 
 
@@ -6309,7 +6345,7 @@ class Search {
             $val = substr($val, $begin, $length-$end-$begin);
          }
 
-         $SEARCH = " $NOT LIKE '".(!$begin?"%":"").$val.(!$end?"%":"")."' ";
+         $SEARCH = " $NOT LIKE '".(!$begin?"%":"").trim($val).(!$end?"%":"")."' ";
       }
       return $SEARCH;
    }

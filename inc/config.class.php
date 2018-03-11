@@ -340,10 +340,6 @@ class Config extends CommonDBTM {
                                               'min'   => 1,
                                               'max'   => 4,
                                               'rand'  => $rand]);
-      echo "</td><td><label for='dropdown_default_graphtype$rand'>" . __('Default chart format')."</label></td><td>";
-      Dropdown::showFromArray("default_graphtype",
-                              ['png' => 'PNG', 'svg' => 'SVG',],
-                              ['value' => $CFG_GLPI["default_graphtype"], 'rand' => $rand]);
       echo "</td></tr>";
 
       echo "<tr class='tab_bg_2'>";
@@ -769,14 +765,14 @@ class Config extends CommonDBTM {
       echo "<tr class='tab_bg_2'>";
       echo "<td><label for='dropdown_enable_api_login_credentials$rand'>";
       echo __("Enable login with credentials")."</label>&nbsp;";
-      Html::showToolTip(__("Allow to login to api and get a session token with user credentials"));
+      Html::showToolTip(__("Allow to login to API and get a session token with user credentials"));
       echo "</td>";
       echo "<td>";
       Dropdown::showYesNo("enable_api_login_credentials", $CFG_GLPI["enable_api_login_credentials"], -1, ['rand' => $rand]);
       echo "</td>";
       echo "<td><label for='dropdown_enable_api_login_external_token$rand'>";
       echo __("Enable login with external token")."</label>&nbsp;";
-      Html::showToolTip(__("Allow to login to api and get a session token with user external token. See Remote access key in user Settings tab "));
+      Html::showToolTip(__("Allow to login to API and get a session token with user external token. See Remote access key in user Settings tab "));
       echo "</td>";
       echo "<td>";
       Dropdown::showYesNo("enable_api_login_external_token", $CFG_GLPI["enable_api_login_external_token"], -1, ['rand' => $rand]);
@@ -985,7 +981,7 @@ class Config extends CommonDBTM {
    function showFormUserPrefs($data = []) {
       global $DB, $CFG_GLPI;
 
-      $oncentral = ($_SESSION["glpiactiveprofile"]["interface"]=="central");
+      $oncentral = (Session::getCurrentInterface() == "central");
       $userpref  = false;
       $url       = Toolbox::getItemTypeFormURL(__CLASS__);
       $rand      = mt_rand();
@@ -1143,14 +1139,22 @@ class Config extends CommonDBTM {
       echo "<td><label for='theme-selector'>" . __("Color palette") . "</label></td><td>";
       $themes_files = scandir(GLPI_ROOT."/css/palettes/");
       echo "<select name='palette' id='theme-selector'>";
+      $themes = [];
       foreach ($themes_files as $key => $file) {
          if (strpos($file, ".css") !== false) {
             $name     = substr($file, 0, -4);
+            if (strpos($name, '.min') !== false) {
+               $name     = substr($name, 0, -4);
+               if (isset($themes[$name])) {
+                  continue;
+               }
+            }
             $selected = "";
             if ($data["palette"] == $name) {
                $selected = "selected='selected'";
             }
             echo "<option value='$name' $selected>".ucfirst($name)."</option>";
+            $themes[$name] = true;
          }
       }
       echo Html::scriptBlock("
@@ -2508,13 +2512,19 @@ class Config extends CommonDBTM {
       ]);
 
       /* TODO: could be improved, only default vhost checked */
-      if ($fic = fopen('http://localhost'.$CFG_GLPI['root_doc'].'/index.php?skipCheckWriteAccessToDirs=1', 'r', false, $context)) {
+      $protocol = 'http';
+      if (isset($_SERVER['HTTPS'])) {
+         $protocol = 'https';
+      }
+      $uri = $protocol . '://' . $_SERVER['SERVER_NAME'] . $CFG_GLPI['root_doc'];
+
+      if ($fic = fopen($uri.'/index.php?skipCheckWriteAccessToDirs=1', 'r', false, $context)) {
          fclose($fic);
          if (!$fordebug) {
             echo "<tr class='tab_bg_1'><td class='b left'>".
                __('Web access to files directory is protected')."</td>";
          }
-         if ($fic = fopen('http://localhost'.$CFG_GLPI['root_doc'].'/files/_log/php-errors.log', 'r', false, $context)) {
+         if ($fic = fopen($uri.'/files/_log/php-errors.log', 'r', false, $context)) {
             fclose($fic);
             if ($fordebug) {
                echo "<img src='".$CFG_GLPI['root_doc']."/pics/warning_min.png'>".
@@ -2537,6 +2547,10 @@ class Config extends CommonDBTM {
                      __s('Web access to files directory is protected')."\"></td></tr>";
             }
          }
+      } else {
+            echo "<td><img src='".$CFG_GLPI['root_doc']."/pics/warning_min.png'>".
+                  "<p class='red'>".__('Web access to the files directory, should not be allowed')."<br/>".
+                  __('Automatic checks cannot be done; please review .htaccess file and the web server configuration.')."</p></td></tr>";
       }
       error_reporting($oldlevel);
       set_error_handler($oldhand);

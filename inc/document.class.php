@@ -568,8 +568,7 @@ class Document extends CommonDBTM {
    function canViewFile($options) {
       global $DB, $CFG_GLPI;
 
-      if (isset($_SESSION["glpiactiveprofile"]["interface"])
-          && ($_SESSION["glpiactiveprofile"]["interface"] == "central")) {
+      if (Session::getCurrentInterface() == "central") {
 
          // My doc Check and Common doc right access
          if ($this->can($this->fields["id"], READ)
@@ -691,6 +690,25 @@ class Document extends CommonDBTM {
                                AND `glpi_documents_items`.`itemtype` = 'Ticket'
                                AND `documents_id` = '".$this->fields["id"]."'";
 
+               $result = $DB->query($query);
+               if ($DB->numrows($result) > 0) {
+                  return true;
+               }
+
+               // check also contents (TODO 9.3 -> JOIN glpi_itilsolutions instead tic.solution)
+               $query = "SELECT *
+                         FROM glpi_tickets AS tic
+                         LEFT JOIN glpi_ticketfollowups AS fup
+                           ON fup.tickets_id = tic.id
+                         LEFT JOIN glpi_tickettasks AS task
+                           ON task.tickets_id = tic.id
+                         WHERE tic.id = {$options["tickets_id"]}
+                         AND (
+                           tic.content LIKE '%document.send.php?docid=".$this->fields["id"]."%'
+                           OR tic.solution LIKE '%document.send.php?docid=".$this->fields["id"]."%'
+                           OR fup.content LIKE '%document.send.php?docid=".$this->fields["id"]."%'
+                           OR task.content LIKE '%document.send.php?docid=".$this->fields["id"]."%'
+                         )";
                $result = $DB->query($query);
                if ($DB->numrows($result) > 0) {
                   return true;

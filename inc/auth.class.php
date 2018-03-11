@@ -1152,7 +1152,7 @@ class Auth extends CommonGLPI {
       }
 
       // Redirect to Command Central if not post-only
-      if ($_SESSION["glpiactiveprofile"]["interface"] == "helpdesk") {
+      if (Session::getCurrentInterface() == "helpdesk") {
          if ($_SESSION['glpiactiveprofile']['create_ticket_on_login']) {
             Html::redirect($CFG_GLPI['root_doc'] . "/front/helpdesk.public.php?create_ticket=1");
          }
@@ -1234,7 +1234,7 @@ class Auth extends CommonGLPI {
      * @return boolean
      */
    static function isValidLogin($login) {
-      return preg_match( "/^[[:alnum:]@.\-_ ]+$/iu", $login);
+      return preg_match( "/^[[:alnum:]'@.\-_ ]+$/iu", $login);
    }
 
    function getTabNameForItem(CommonGLPI $item, $withtemplate = 0) {

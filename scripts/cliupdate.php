@@ -35,7 +35,7 @@
 */
 
 if (in_array('--help', $_SERVER['argv'])) {
-   die("usage: ".$_SERVER['argv'][0]."  [ --force ] [ --optimize ] [ --lang=xx_XX ] [ --config-dir=/path/relative/to/script ]\n");
+   die("usage: ".$_SERVER['argv'][0]."  [ --force ] [ --lang=xx_XX ] [ --config-dir=/path/relative/to/script ] [--dev]\n");
 }
 
 chdir(__DIR__);
@@ -151,8 +151,8 @@ if (version_compare($current_db_version, GLPI_SCHEMA_VERSION, 'ne')) {
    $migration->displayWarning("\nMigration Done.");
 } else if (isset($args['force']) || $current_db_version != GLPI_SCHEMA_VERSION && isset($args['dev'])) {
 
-   include_once("../install/update_92_921.php");
-   update92to921();
+   include_once("../install/update_921_922.php");
+   update921to922();
 
    $migration->displayWarning((isset($args['force']) ? "\nForced" : "\nDevelopment") . " migration Done.");
 } else {

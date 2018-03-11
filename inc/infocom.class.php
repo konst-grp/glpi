@@ -775,11 +775,11 @@ class Infocom extends CommonDBChild {
 
       $now = new \DateTime('now', new DateTimeZone($TZ));
 
-      $elapsed = $now->diff($usedate);
+      $elapsed_years = $now->format('Y') - $usedate->format('Y');
 
       $annuity = $value * (1 / $duration);
       $years = [];
-      for ($i = 0; $i <= $elapsed->format('%y'); ++$i) {
+      for ($i = 0; $i <= $elapsed_years; ++$i) {
          $begin_value      = $value;
          $current_annuity  = $annuity;
          $fiscal_end       = new \DateTime(
@@ -1592,7 +1592,7 @@ class Infocom extends CommonDBChild {
       ];
 
       $tab[] = [
-         'id'                 => '123',
+         'id'                 => '173',
          'table'              => 'glpi_businesscriticities',
          'field'              => 'completename',
          'name'               => __('Business criticity'),

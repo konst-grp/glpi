@@ -192,7 +192,7 @@ class APIXmlrpc extends API {
             $response = $this->createItems($this->parameters['itemtype'], $this->parameters);
 
             $additionalheaders = [];
-            if (count($response) == 1) {
+            if (isset($response['id'])) {
                // add a location targetting created element
                $additionalheaders['location'] = self::$api_url."/".$this->parameters['itemtype']."/".$response['id'];
             } else {
@@ -260,6 +260,16 @@ class APIXmlrpc extends API {
          } else {
             $this->parameters['input'] = json_decode(json_encode($this->parameters['input']),
                                                                  false);
+         }
+      }
+
+      // check boolean parameters
+      foreach ($this->parameters as $key => &$parameter) {
+         if ($parameter === "true") {
+            $parameter = true;
+         }
+         if ($parameter === "false") {
+            $parameter = false;
          }
       }
 
